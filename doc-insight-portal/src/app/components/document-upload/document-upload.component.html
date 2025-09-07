@@ -1,0 +1,97 @@
+<div class="document-upload-container">
+  <div class="header">
+    <h2>Document Upload</h2>
+    <div class="upload-info">
+      <p>Supported formats: PDF, DOC, DOCX, TXT, MD</p>
+      <p>Maximum file size: 10MB</p>
+    </div>
+  </div>
+
+  <div class="upload-area" 
+       [class.drag-over]="isDragOver"
+       (dragover)="onDragOver($event)"
+       (dragleave)="onDragLeave($event)"
+       (drop)="onDrop($event)">
+    
+    <div *ngIf="!selectedFile" class="upload-prompt">
+      <mat-icon>cloud_upload</mat-icon>
+      <h3>Drag and drop your document here</h3>
+      <p>or</p>
+      <button mat-raised-button color="primary" (click)="fileInput.click()">
+        <mat-icon>attach_file</mat-icon>
+        Choose File
+      </button>
+      <input #fileInput type="file" 
+             [accept]="allowedFileTypes" 
+             (change)="onFileSelected($event)"
+             style="display: none;">
+    </div>
+
+    <div *ngIf="selectedFile" class="file-selected">
+      <div class="file-info">
+        <mat-icon class="file-icon">description</mat-icon>
+        <div class="file-details">
+          <h4>{{ selectedFile.name }}</h4>
+          <p>{{ fileSizeMB }} • {{ selectedFile.type || 'Unknown type' }}</p>
+        </div>
+        <button mat-icon-button color="warn" (click)="removeFile()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="file-validation" [class.valid]="isFileValid" [class.invalid]="!isFileValid">
+        <mat-icon *ngIf="isFileValid" color="accent">check_circle</mat-icon>
+        <mat-icon *ngIf="!isFileValid" color="warn">error</mat-icon>
+        <span *ngIf="isFileValid">File is valid and ready to upload</span>
+        <span *ngIf="!isFileValid">File type or size not supported</span>
+      </div>
+
+      <div class="description-input">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Document Description (Optional)</mat-label>
+          <textarea matInput 
+                    [(ngModel)]="description" 
+                    rows="3" 
+                    placeholder="Enter a brief description of the document..."></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="upload-actions">
+        <button mat-button (click)="removeFile()">Cancel</button>
+        <button mat-raised-button 
+                color="primary" 
+                [disabled]="!isFileValid || uploading"
+                (click)="uploadDocument()">
+          <mat-icon *ngIf="!uploading">cloud_upload</mat-icon>
+          <mat-spinner *ngIf="uploading" diameter="20"></mat-spinner>
+          {{ uploading ? 'Uploading...' : 'Upload Document' }}
+        </button>
+      </div>
+
+      <div *ngIf="uploading" class="upload-progress">
+        <mat-progress-bar 
+          mode="determinate" 
+          [value]="uploadProgress"
+          color="primary">
+        </mat-progress-bar>
+        <p>{{ uploadProgress }}% Complete</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!canUpload" class="permission-warning">
+    <mat-icon color="warn">warning</mat-icon>
+    <p>You need Editor or Admin permissions to upload documents.</p>
+    <p>Please contact your administrator to request access.</p>
+  </div>
+
+  <div class="upload-tips">
+    <h4>Upload Tips:</h4>
+    <ul>
+      <li>Ensure your document is clear and readable</li>
+      <li>Use descriptive filenames for better organization</li>
+      <li>Add a description to help others understand the content</li>
+      <li>Documents will be processed automatically after upload</li>
+    </ul>
+  </div>
+</div>

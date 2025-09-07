@@ -1,0 +1,77 @@
+<div class="dashboard-container">
+  <!-- Welcome Section -->
+  <div class="welcome-section">
+    <div class="welcome-content">
+      <h1 class="welcome-title">
+        {{ getGreeting() }}, {{ currentUser?.first_name }}!
+      </h1>
+      <p class="welcome-subtitle">
+        Welcome to your Doc Insight Portal dashboard. Here's what's happening with your documents.
+      </p>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-section">
+    <h2 class="section-title">Overview</h2>
+    <div class="stats-grid">
+      <mat-card 
+        *ngFor="let card of statCards" 
+        class="stat-card"
+        [style.border-left-color]="card.color"
+        (click)="card.route ? navigateTo(card.route) : null"
+        [class.clickable]="!!card.route">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" [style.background-color]="card.color">
+              <mat-icon>{{ card.icon }}</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ card.value }}</div>
+              <div class="stat-title">{{ card.title }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="actions-section">
+    <h2 class="section-title">Quick Actions</h2>
+    <div class="actions-grid">
+      <mat-card 
+        *ngFor="let action of quickActions" 
+        class="action-card"
+        (click)="navigateTo(action.route)"
+        [style.border-left-color]="action.color">
+        <mat-card-content>
+          <div class="action-content">
+            <div class="action-icon" [style.background-color]="action.color">
+              <mat-icon>{{ action.icon }}</mat-icon>
+            </div>
+            <div class="action-details">
+              <h3 class="action-title">{{ action.title }}</h3>
+              <p class="action-description">{{ action.description }}</p>
+            </div>
+            <mat-icon class="action-arrow">arrow_forward</mat-icon>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="activity-section">
+    <h2 class="section-title">Recent Activity</h2>
+    <mat-card class="activity-card">
+      <mat-card-content>
+        <div class="activity-placeholder">
+          <mat-icon class="activity-icon">timeline</mat-icon>
+          <p>No recent activity to display</p>
+          <p class="activity-subtitle">Your document activities will appear here</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

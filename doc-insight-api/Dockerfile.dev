@@ -1,0 +1,29 @@
+# Development Dockerfile
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install nodemon globally for development
+RUN npm install -g nodemon
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p logs uploads
+
+# Make startup script executable
+RUN chmod +x ./scripts/startup.sh
+
+# Expose port
+EXPOSE 3000
+
+# Start with migrations and nodemon for development
+CMD ["./scripts/startup.sh"]

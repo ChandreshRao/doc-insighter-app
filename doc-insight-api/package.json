@@ -1,0 +1,92 @@
+{
+  "name": "doc-insight-api",
+  "version": "1.0.0",
+  "description": "Node.js Backend Service for Doc Insight Application",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && node scripts/copy-db-files.js",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:auth": "jest src/tests/authService.test.ts src/tests/authRoutes.test.ts src/tests/authMiddleware.test.ts",
+    "test:users": "jest src/tests/userRoutes.test.ts",
+    "test:roles": "jest src/tests/rolePermissions.test.ts",
+    "test:integration": "jest src/tests/authIntegration.test.ts",
+    "test:ingestion": "jest src/tests/ingestionRoutes.test.ts src/tests/mockIngestionService.test.ts",
+    "test:comprehensive": "npm run lint && npm run test:coverage",
+    "test:all": "npm run test:coverage",
+    "setup:env": "./bin/setup-env.sh",
+    "setup:env:win": "bin\\setup-env.bat",
+    "setup:env:force": "./bin/setup-env.sh --force",
+    "setup:env:force:win": "bin\\setup-env.bat",
+    "db:copy-files": "./bin/copy-db-files.sh",
+    "db:copy-files:win": "bin\\copy-db-files.bat",
+    "db:migrate": "npm run db:copy-files && ./bin/migrate.sh",
+    "db:migrate:win": "npm run db:copy-files:win && bin\\migrate.bat",
+    "db:migrate:manual": "echo 'Please run: ./bin/migrate.sh (Linux/Mac) or bin\\migrate.bat (Windows)'",
+    "db:generate-test-data": "ts-node src/scripts/generateTestData.ts",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "keywords": ["rag", "qa", "nodejs", "typescript", "postgresql"],
+  "author": "Chandresh Rao",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "knex": "^3.0.1",
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0",
+    "express-validator": "^7.0.1",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.5",
+    "@types/pg": "^8.10.9",
+    "@types/multer": "^1.4.11",
+    "@types/uuid": "^9.0.7",
+    "@types/node": "^20.10.0",
+    "@types/jest": "^29.5.8",
+    "@types/supertest": "^2.0.16",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.2"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.ts",
+      "!src/**/*.d.ts",
+      "!src/scripts/**/*.ts",
+      "!src/index.ts"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 70,
+        "statements": 70
+      }
+    }
+  }
+}

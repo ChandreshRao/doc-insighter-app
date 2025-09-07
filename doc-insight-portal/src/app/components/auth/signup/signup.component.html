@@ -1,0 +1,169 @@
+<div class="signup-container">
+  <div class="signup-card">
+    <div class="signup-header">
+      <mat-icon class="signup-icon">person_add</mat-icon>
+      <h1 class="signup-title">Create Account</h1>
+      <p class="signup-subtitle">Join Doc Insight Portal to manage your documents</p>
+    </div>
+
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="signup-form">
+      <!-- Username Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Username</mat-label>
+        <input matInput 
+               type="text" 
+               formControlName="username" 
+               placeholder="Enter your username"
+               autocomplete="username">
+        <mat-icon matSuffix>account_circle</mat-icon>
+        <mat-error *ngIf="signupForm.get('username')?.invalid && signupForm.get('username')?.touched">
+          {{ getErrorMessage('username') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- First Name Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>First Name</mat-label>
+        <input matInput 
+               type="text" 
+               formControlName="first_name" 
+               placeholder="Enter your first name"
+               autocomplete="given-name">
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error *ngIf="signupForm.get('first_name')?.invalid && signupForm.get('first_name')?.touched">
+          {{ getErrorMessage('first_name') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Last Name Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Last Name</mat-label>
+        <input matInput 
+               type="text" 
+               formControlName="last_name" 
+               placeholder="Enter your last name"
+               autocomplete="family-name">
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error *ngIf="signupForm.get('last_name')?.invalid && signupForm.get('last_name')?.touched">
+          {{ getErrorMessage('last_name') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Email Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Email</mat-label>
+        <input matInput 
+               type="email" 
+               formControlName="email" 
+               placeholder="Enter your email"
+               autocomplete="email">
+        <mat-icon matSuffix>email</mat-icon>
+        <mat-error *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched">
+          {{ getErrorMessage('email') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Password Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Password</mat-label>
+        <input matInput 
+               [type]="hidePassword ? 'password' : 'text'" 
+               formControlName="password" 
+               placeholder="Enter your password"
+               autocomplete="new-password">
+        <button mat-icon-button 
+                matSuffix 
+                (click)="hidePassword = !hidePassword" 
+                type="button"
+                [attr.aria-label]="'Hide password'"
+                [attr.aria-pressed]="hidePassword">
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched">
+          {{ getErrorMessage('password') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Password Requirements Hint -->
+      <div class="password-requirements">
+        <p><strong>Password must contain:</strong></p>
+        <ul>
+          <li [class.valid]="hasMinLength()">At least 8 characters</li>
+          <li [class.valid]="hasLowercase()">One lowercase letter</li>
+          <li [class.valid]="hasUppercase()">One uppercase letter</li>
+          <li [class.valid]="hasNumber()">One number</li>
+          <li [class.valid]="hasSpecialChar()">One special character</li>
+        </ul>
+      </div>
+
+      <!-- Confirm Password Field -->
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Confirm Password</mat-label>
+        <input matInput 
+               [type]="hideConfirmPassword ? 'password' : 'text'" 
+               formControlName="confirmPassword" 
+               placeholder="Confirm your password"
+               autocomplete="new-password">
+        <button mat-icon-button 
+                matSuffix 
+                (click)="hideConfirmPassword = !hideConfirmPassword" 
+                type="button"
+                [attr.aria-label]="'Hide confirm password'"
+                [attr.aria-pressed]="hideConfirmPassword">
+          <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="signupForm.get('confirmPassword')?.invalid && signupForm.get('confirmPassword')?.touched">
+          {{ getErrorMessage('confirmPassword') }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Password Match Indicator -->
+      <div *ngIf="signupForm.get('password')?.value && signupForm.get('confirmPassword')?.value" 
+           class="password-match-indicator"
+           [class.match]="signupForm.get('password')?.value === signupForm.get('confirmPassword')?.value"
+           [class.no-match]="signupForm.get('password')?.value !== signupForm.get('confirmPassword')?.value">
+        <mat-icon>{{ signupForm.get('password')?.value === signupForm.get('confirmPassword')?.value ? 'check_circle' : 'error' }}</mat-icon>
+        <span>{{ signupForm.get('password')?.value === signupForm.get('confirmPassword')?.value ? 'Passwords match' : 'Passwords do not match' }}</span>
+      </div>
+
+      <!-- Form-level Password Mismatch Error -->
+      <div *ngIf="signupForm.hasError('passwordMismatch') && signupForm.get('confirmPassword')?.touched" 
+           class="form-error-message">
+        <mat-icon color="warn">error</mat-icon>
+        <span>{{ getPasswordMatchError() }}</span>
+      </div>
+
+      <!-- Debug Info (remove in production) -->
+      <div class="debug-info" style="font-size: 12px; color: #666; margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+        <strong>Debug Info:</strong><br>
+        Form Valid: {{ signupForm.valid }}<br>
+        Form Invalid: {{ signupForm.invalid }}<br>
+        Form Errors: {{ signupForm.errors | json }}<br>
+        Password Match Error: {{ signupForm.hasError('passwordMismatch') }}<br>
+        Username Valid: {{ signupForm.get('username')?.valid }}<br>
+        First Name Valid: {{ signupForm.get('first_name')?.valid }}<br>
+        Last Name Valid: {{ signupForm.get('last_name')?.valid }}<br>
+        Email Valid: {{ signupForm.get('email')?.valid }}<br>
+        Password Valid: {{ signupForm.get('password')?.valid }}<br>
+        Confirm Password Valid: {{ signupForm.get('confirmPassword')?.valid }}
+      </div>
+
+      <!-- Submit Button -->
+      <button mat-raised-button 
+              color="primary" 
+              type="submit" 
+              class="submit-btn"
+              [disabled]="signupForm.invalid || isLoading">
+        <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+        <span *ngIf="!isLoading">Create Account</span>
+      </button>
+    </form>
+
+    <!-- Login Link -->
+    <div class="login-link">
+      <p>Already have an account? 
+        <a (click)="navigateToLogin()" class="link">Sign in here</a>
+      </p>
+    </div>
+  </div>
+</div>

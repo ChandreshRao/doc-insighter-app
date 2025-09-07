@@ -1,0 +1,48 @@
+<mat-sidenav-container class="sidebar-container">
+  <!-- Mobile Menu Toggle -->
+  <div class="mobile-menu-toggle" *ngIf="isMobile">
+    <button mat-icon-button (click)="toggleSidebar()" class="menu-toggle-btn">
+      <mat-icon>menu</mat-icon>
+    </button>
+  </div>
+
+  <!-- Sidebar Content -->
+  <div class="sidebar-content" [class.open]="isOpen">
+    <!-- User Profile Section -->
+    <div class="user-profile" *ngIf="currentUser">
+      <div class="user-avatar">
+        <mat-icon>account_circle</mat-icon>
+      </div>
+      <div class="user-details">
+                  <div class="user-name">{{ currentUser.first_name }} {{ currentUser.last_name }}</div>
+        <div class="user-role">{{ currentUser.role | titlecase }}</div>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="navigation-menu">
+      <mat-nav-list>
+        <a mat-list-item 
+           *ngFor="let item of getFilteredMenuItems()"
+           [routerLink]="item.route"
+           routerLinkActive="active"
+           (click)="navigateTo(item.route)"
+           class="nav-item">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      </mat-nav-list>
+    </nav>
+
+    <!-- Footer -->
+    <div class="sidebar-footer">
+      <div class="app-version">v1.0.0</div>
+    </div>
+  </div>
+
+  <!-- Overlay for mobile -->
+  <div class="sidebar-overlay" 
+       *ngIf="isMobile && isOpen" 
+       (click)="closeSidebar()">
+  </div>
+</mat-sidenav-container>

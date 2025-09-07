@@ -1,0 +1,23 @@
+# Test Dockerfile for Angular application
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies globally for testing
+RUN npm install -g @angular/cli@latest
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Expose port for test server (if needed)
+EXPOSE 9876
+
+# Run tests
+CMD ["npm", "test", "--", "--watch=false", "--browsers=ChromeHeadless"]

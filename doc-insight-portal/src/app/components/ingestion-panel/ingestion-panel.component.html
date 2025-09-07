@@ -1,0 +1,131 @@
+<div class="ingestion-panel-container">
+  <div class="header">
+    <h2>Ingestion Management</h2>
+    <div class="header-actions">
+      <button mat-raised-button 
+              color="primary" 
+              [disabled]="loading || (ingestionStatus?.status === 'running')"
+              (click)="startIngestion()">
+        <mat-icon>play_arrow</mat-icon>
+        Start Ingestion
+      </button>
+      <button mat-raised-button 
+              color="warn" 
+              [disabled]="loading || (ingestionStatus?.status !== 'running')"
+              (click)="stopIngestion()">
+        <mat-icon>stop</mat-icon>
+        Stop Ingestion
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div *ngIf="loading" class="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading ingestion status...</p>
+    </div>
+
+    <div *ngIf="!loading && !ingestionStatus" class="no-status">
+      <mat-icon>info</mat-icon>
+      <p>No ingestion status available</p>
+      <p>Click "Start Ingestion" to begin processing documents</p>
+    </div>
+
+    <div *ngIf="!loading && ingestionStatus" class="status-display">
+      <div class="status-card">
+        <div class="status-header">
+          <h3>Current Status</h3>
+          <div class="status-badge" [style.background-color]="getStatusColor()">
+            {{ ingestionStatus.status | titlecase }}
+          </div>
+        </div>
+
+        <div class="status-details">
+          <div class="status-item">
+            <span class="label">Total Documents:</span>
+            <span class="value">{{ ingestionStatus.totalDocuments }}</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Processed:</span>
+            <span class="value">{{ ingestionStatus.processedDocuments }}</span>
+          </div>
+          <div class="status-item" *ngIf="ingestionStatus.startTime">
+            <span class="label">Started:</span>
+            <span class="value">{{ ingestionStatus.startTime | date:'medium' }}</span>
+          </div>
+          <div class="status-item" *ngIf="ingestionStatus.endTime">
+            <span class="label">Completed:</span>
+            <span class="value">{{ ingestionStatus.endTime | date:'medium' }}</span>
+          </div>
+        </div>
+
+        <div *ngIf="ingestionStatus.status === 'running'" class="progress-section">
+          <div class="progress-header">
+            <span>Processing Progress</span>
+            <span>{{ getProgressPercentage() | number:'1.0-0' }}%</span>
+          </div>
+          <mat-progress-bar 
+            mode="determinate" 
+            [value]="getProgressPercentage()"
+            color="primary">
+          </mat-progress-bar>
+        </div>
+
+        <div *ngIf="ingestionStatus.errorMessage" class="error-section">
+          <mat-icon color="warn">error</mat-icon>
+          <div class="error-content">
+            <h4>Error Occurred</h4>
+            <p>{{ ingestionStatus.errorMessage }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions-section">
+        <button mat-stroked-button 
+                color="primary" 
+                [disabled]="loading"
+                (click)="loadStatus()">
+          <mat-icon>refresh</mat-icon>
+          Refresh Status
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      <mat-icon color="warn">warning</mat-icon>
+      <span>{{ error }}</span>
+      <button mat-icon-button (click)="clearError()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="info-section">
+    <h4>About Ingestion</h4>
+    <p>The ingestion process analyzes and indexes your uploaded documents to enable intelligent search and question-answering capabilities.</p>
+    
+    <div class="info-grid">
+      <div class="info-item">
+        <mat-icon>schedule</mat-icon>
+        <div>
+          <h5>Processing Time</h5>
+          <p>Varies based on document size and complexity</p>
+        </div>
+      </div>
+      <div class="info-item">
+        <mat-icon>storage</mat-icon>
+        <div>
+          <h5>Storage</h5>
+          <p>Documents are securely stored and indexed</p>
+        </div>
+      </div>
+      <div class="info-item">
+        <mat-icon>search</mat-icon>
+        <div>
+          <h5>Search Ready</h5>
+          <p>Once processed, documents become searchable</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,31 @@
+<mat-toolbar color="primary" class="header-toolbar">
+  <div class="header-content">
+    <!-- Logo and Title -->
+    <div class="header-left">
+      <mat-icon class="header-icon">description</mat-icon>
+      <span class="header-title">{{ title }}</span>
+    </div>
+
+    <!-- User Menu -->
+    <div class="header-right">
+      <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-menu-trigger">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+      
+      <mat-menu #userMenu="matMenu" class="user-menu">
+        <div class="user-info" *ngIf="currentUser">
+          <div class="user-name">{{ currentUser.first_name }} {{ currentUser.last_name }}</div>
+          <div class="user-email">{{ currentUser.email }}</div>
+          <div class="user-role">{{ currentUser.role }}</div>
+        </div>
+        
+        <mat-divider></mat-divider>
+        
+        <button mat-menu-item (click)="onLogout()">
+          <mat-icon>exit_to_app</mat-icon>
+          <span>Logout</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+</mat-toolbar>
