@@ -3,11 +3,13 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 
 import { DashboardService, DashboardStats, DocumentStats, UserStats, IngestionStats, QaStats } from '../../app/services/dashboard.service';
 import { ConfigService } from '../../app/services/config.service';
+import { AuthService } from '../../app/services/auth.service';
 
 describe('DashboardService', () => {
   let service: DashboardService;
   let httpMock: HttpTestingController;
   let mockConfigService: jasmine.SpyObj<ConfigService>;
+  let mockAuthService: jasmine.SpyObj<AuthService>;
 
   const mockDocumentStats: DocumentStats = {
     total: 10,
@@ -25,7 +27,7 @@ describe('DashboardService', () => {
 
   const mockIngestionStats: IngestionStats = {
     total: 3,
-    byStatus: { idle: 1, running: 1, completed: 1, error: 0 },
+    byStatus: { idle: 1, processing: 1, completed: 1, failed: 0 },
     recentJobs: []
   };
 
@@ -42,21 +44,28 @@ describe('DashboardService', () => {
   };
 
   beforeEach(() => {
-    const configServiceSpy = jasmine.createSpyObj('ConfigService', ['apiUrl'], {
-      apiUrl: 'http://localhost:3000/api'
+    const configServiceSpy = jasmine.createSpyObj('ConfigService', ['apiUrl', 'ragServiceUrl'], {
+      apiUrl: 'http://localhost:3000/api',
+      ragServiceUrl: 'http://localhost:8000'
+    });
+
+    const authServiceSpy = jasmine.createSpyObj('AuthService', ['getToken'], {
+      getToken: jasmine.createSpy().and.returnValue('mock-token')
     });
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
         DashboardService,
-        { provide: ConfigService, useValue: configServiceSpy }
+        { provide: ConfigService, useValue: configServiceSpy },
+        { provide: AuthService, useValue: authServiceSpy }
       ]
     });
 
     service = TestBed.inject(DashboardService);
     httpMock = TestBed.inject(HttpTestingController);
     mockConfigService = TestBed.inject(ConfigService) as jasmine.SpyObj<ConfigService>;
+    mockAuthService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
   });
 
   afterEach(() => {
@@ -75,19 +84,19 @@ describe('DashboardService', () => {
     // Expect multiple API calls for different stats
     const documentReq = httpMock.expectOne('http://localhost:3000/api/documents/stats/overview');
     expect(documentReq.request.method).toBe('GET');
-    documentReq.flush(mockDocumentStats);
+    documentReq.flush({ success: true, data: mockDocumentStats });
 
-    const userReq = httpMock.expectOne('http://localhost:3000/api/users/stats');
+    const userReq = httpMock.expectOne('http://localhost:3000/api/users/stats/overview');
     expect(userReq.request.method).toBe('GET');
-    userReq.flush(mockUserStats);
+    userReq.flush({ success: true, data: mockUserStats });
 
-    const ingestionReq = httpMock.expectOne('http://localhost:3000/api/ingestion/stats');
+    const ingestionReq = httpMock.expectOne('http://localhost:3000/api/ingestion/stats/overview');
     expect(ingestionReq.request.method).toBe('GET');
-    ingestionReq.flush(mockIngestionStats);
+    ingestionReq.flush({ success: true, data: mockIngestionStats });
 
-    const qaReq = httpMock.expectOne('http://localhost:3000/api/qa/stats');
+    const qaReq = httpMock.expectOne('http://localhost:8000/api/qa/stats');
     expect(qaReq.request.method).toBe('GET');
-    qaReq.flush(mockQaStats);
+    qaReq.flush({ success: true, data: mockQaStats });
   });
 
   it('should get document stats', () => {
@@ -97,7 +106,7 @@ describe('DashboardService', () => {
 
     const req = httpMock.expectOne('http://localhost:3000/api/documents/stats/overview');
     expect(req.request.method).toBe('GET');
-    req.flush(mockDocumentStats);
+    req.flush({ success: true, data: mockDocumentStats });
   });
 
   it('should get user stats', () => {
@@ -105,9 +114,9 @@ describe('DashboardService', () => {
       expect(stats).toEqual(mockUserStats);
     });
 
-    const req = httpMock.expectOne('http://localhost:3000/api/users/stats');
+    const req = httpMock.expectOne('http://localhost:3000/api/users/stats/overview');
     expect(req.request.method).toBe('GET');
-    req.flush(mockUserStats);
+    req.flush({ success: true, data: mockUserStats });
   });
 
   it('should get ingestion stats', () => {
@@ -115,9 +124,9 @@ describe('DashboardService', () => {
       expect(stats).toEqual(mockIngestionStats);
     });
 
-    const req = httpMock.expectOne('http://localhost:3000/api/ingestion/stats');
+    const req = httpMock.expectOne('http://localhost:3000/api/ingestion/stats/overview');
     expect(req.request.method).toBe('GET');
-    req.flush(mockIngestionStats);
+    req.flush({ success: true, data: mockIngestionStats });
   });
 
   it('should get QA stats', () => {
@@ -125,33 +134,33 @@ describe('DashboardService', () => {
       expect(stats).toEqual(mockQaStats);
     });
 
-    const req = httpMock.expectOne('http://localhost:3000/api/qa/stats');
+    const req = httpMock.expectOne('http://localhost:8000/api/qa/stats');
     expect(req.request.method).toBe('GET');
-    req.flush(mockQaStats);
+    req.flush({ success: true, data: mockQaStats });
   });
 
   it('should determine processing status correctly', () => {
     const processingIngestion: IngestionStats = {
       total: 5,
-      byStatus: { idle: 0, running: 2, completed: 3, error: 0 },
+      byStatus: { processing: 2, completed: 3, idle: 0 },
       recentJobs: []
     };
 
     const idleIngestion: IngestionStats = {
       total: 5,
-      byStatus: { idle: 5, running: 0, completed: 0, error: 0 },
+      byStatus: { idle: 5, completed: 0, processing: 0 },
       recentJobs: []
     };
 
     const pendingIngestion: IngestionStats = {
       total: 5,
-      byStatus: { idle: 0, running: 0, completed: 0, error: 0, pending: 3 },
+      byStatus: { pending: 3, completed: 0, processing: 0 },
       recentJobs: []
     };
 
     const errorIngestion: IngestionStats = {
       total: 5,
-      byStatus: { idle: 0, running: 0, completed: 0, error: 2 },
+      byStatus: { failed: 2, completed: 0, processing: 0 },
       recentJobs: []
     };
 

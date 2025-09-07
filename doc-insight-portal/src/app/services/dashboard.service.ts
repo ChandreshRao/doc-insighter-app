@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, throwError } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Observable, forkJoin, throwError, of } from 'rxjs';
+import { catchError, map, timeout, switchMap } from 'rxjs/operators';
 import { ConfigService } from './config.service';
+import { AuthService } from './auth.service';
 
 export interface DashboardStats {
   totalDocuments: number;
@@ -44,7 +45,8 @@ export class DashboardService {
 
   constructor(
     private http: HttpClient,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private authService: AuthService
   ) {
     this.API_URL = this.configService.apiUrl;
   }
@@ -53,6 +55,12 @@ export class DashboardService {
    * Get all dashboard statistics
    */
   getDashboardStats(): Observable<DashboardStats> {
+    // Check if user is authenticated
+    if (!this.authService.getToken()) {
+      console.error('Dashboard Service: User not authenticated');
+      return throwError(() => new Error('User not authenticated'));
+    }
+
     return forkJoin({
       documents: this.getDocumentStats(),
       users: this.getUserStats(),
@@ -65,7 +73,27 @@ export class DashboardService {
         questionsAsked: qa.totalQuestions,
         activeUsers: users.activeToday
       })),
-      catchError(this.handleError)
+      catchError(error => {
+        console.error('Dashboard Service - Overall Error:', error);
+        
+        // If it's an authentication error, try to refresh token
+        if (error.status === 401) {
+          console.warn('Authentication error detected, attempting token refresh...');
+          return this.authService.refreshToken().pipe(
+            // After refresh, retry the dashboard stats
+            switchMap(() => this.getDashboardStats())
+          );
+        }
+        
+        // For other errors, return default stats
+        console.warn('Using fallback dashboard stats due to error');
+        return of({
+          totalDocuments: 0,
+          processingStatus: 'Unknown',
+          questionsAsked: 0,
+          activeUsers: 0
+        });
+      })
     );
   }
 
@@ -76,7 +104,10 @@ export class DashboardService {
     return this.http.get<{ success: boolean; data: DocumentStats }>(`${this.API_URL}/documents/stats/overview`)
       .pipe(
         map(response => response.data),
-        catchError(this.handleError)
+        catchError(error => {
+          console.error('Dashboard Service - Document Stats Error:', error);
+          return this.handleError(error);
+        })
       );
   }
 
@@ -87,7 +118,10 @@ export class DashboardService {
     return this.http.get<{ success: boolean; data: UserStats }>(`${this.API_URL}/users/stats/overview`)
       .pipe(
         map(response => response.data),
-        catchError(this.handleError)
+        catchError(error => {
+          console.error('Dashboard Service - User Stats Error:', error);
+          return this.handleError(error);
+        })
       );
   }
 
@@ -98,7 +132,10 @@ export class DashboardService {
     return this.http.get<{ success: boolean; data: IngestionStats }>(`${this.API_URL}/ingestion/stats/overview`)
       .pipe(
         map(response => response.data),
-        catchError(this.handleError)
+        catchError(error => {
+          console.error('Dashboard Service - Ingestion Stats Error:', error);
+          return this.handleError(error);
+        })
       );
   }
 
@@ -108,8 +145,16 @@ export class DashboardService {
   getQaStats(): Observable<QaStats> {
     return this.http.get<{ success: boolean; data: QaStats }>(`${this.configService.ragServiceUrl}/api/qa/stats`)
       .pipe(
+        timeout(5000), // 5 second timeout
         map(response => response.data),
-        catchError(this.handleError)
+        catchError(error => {
+          console.warn('QA Service not available, using fallback stats:', error);
+          // Return default QA stats when service is unavailable
+          return of({
+            totalQuestions: 0,
+            recentQuestions: []
+          });
+        })
       );
   }
 

@@ -89,10 +89,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe(user => {
       this.currentUser = user;
+      
+      // Only load dashboard statistics if user is authenticated
+      if (user) {
+        this.loadDashboardStats();
+      } else {
+        console.warn('Dashboard: User not authenticated, skipping stats load');
+      }
     });
 
-    // Load dashboard statistics
-    this.loadDashboardStats();
+    // Also listen to authentication state changes
+    this.authService.isAuthenticated$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(isAuthenticated => {
+      if (!isAuthenticated) {
+        console.warn('Dashboard: Authentication lost, redirecting to login');
+        this.router.navigate(['/login']);
+      }
+    });
 
     // Filter admin-only items
     if (!this.authService.isAdmin()) {
@@ -120,6 +134,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private loadDashboardStats(): void {
     this.isLoading = true;
     
+    // Debug: Check authentication state
+    const token = this.authService.getToken();
+    const currentUser = this.authService.getCurrentUser();
+    console.log('Dashboard loading stats - Auth state:', {
+      hasToken: !!token,
+      tokenLength: token?.length || 0,
+      currentUser: currentUser?.email || 'none',
+      userRole: currentUser?.role || 'none'
+    });
+    
     this.dashboardService.getDashboardStats()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -130,6 +154,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading dashboard stats:', error);
+          console.error('Error details:', {
+            status: error.status,
+            statusText: error.statusText,
+            message: error.message,
+            url: error.url
+          });
           this.isLoading = false;
           // Keep default values on error
         }

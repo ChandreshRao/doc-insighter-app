@@ -24,12 +24,32 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
     
+    // Debug: Log token status for API requests
+    if (request.url.includes('/api/')) {
+      console.log('Auth Interceptor - Request:', {
+        url: request.url,
+        hasToken: !!token,
+        tokenLength: token?.length || 0,
+        method: request.method
+      });
+    }
+    
     if (token) {
       request = this.addToken(request, token);
     }
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
+        // Debug: Log 401 errors
+        if (error.status === 401) {
+          console.error('Auth Interceptor - 401 Error:', {
+            url: request.url,
+            status: error.status,
+            statusText: error.statusText,
+            hasToken: !!token
+          });
+        }
+        
         // Don't try to refresh token for auth endpoints (login, register, refresh)
         const isAuthEndpoint = request.url.includes('auth/login') || 
                               request.url.includes('auth/register') || 

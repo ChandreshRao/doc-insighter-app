@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { ConfigService } from './config.service';
@@ -198,6 +198,26 @@ export class AuthService {
 
   private clearStoredUser(): void {
     localStorage.removeItem(this.USER_KEY);
+  }
+
+  /**
+   * Validate current token by making a test API call
+   */
+  validateToken(): Observable<boolean> {
+    const token = this.getToken();
+    if (!token) {
+      return of(false);
+    }
+
+    // Make a simple API call to validate the token
+    return this.http.get(`${this.API_URL}/validate`).pipe(
+      map(() => true),
+      catchError(() => {
+        // Token is invalid, clear auth data
+        this.logout();
+        return of(false);
+      })
+    );
   }
 
   private handleError(error: any): Observable<never> {

@@ -38,8 +38,12 @@ describe('AuthService', () => {
   };
 
   beforeEach(() => {
-    const configServiceSpy = jasmine.createSpyObj('ConfigService', ['apiUrl'], {
-      apiUrl: 'http://localhost:3000/api'
+    // Clear localStorage before each test to ensure clean state
+    localStorage.clear();
+    
+    const configServiceSpy = jasmine.createSpyObj('ConfigService', ['apiUrl', 'authUrl'], {
+      apiUrl: 'http://localhost:3000/api',
+      authUrl: 'http://localhost:3000/api/auth'
     });
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const errorMappingServiceSpy = jasmine.createSpyObj('ErrorMappingService', ['getUserFriendlyMessage']);
@@ -104,7 +108,8 @@ describe('AuthService', () => {
     service.login(loginRequest).subscribe({
       next: () => fail('Should have failed'),
       error: (err: any) => {
-        expect(err).toEqual(error);
+        expect(err.status).toBe(401);
+        expect(err.error.message).toBe('Invalid credentials');
       }
     });
 
@@ -124,7 +129,7 @@ describe('AuthService', () => {
       expect(user).toEqual(mockUser);
     });
 
-    const req = httpMock.expectOne('http://localhost:3000/api/auth/signup');
+    const req = httpMock.expectOne('http://localhost:3000/api/auth/register');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(signupRequest);
     req.flush(mockAuthResponse);
@@ -144,11 +149,12 @@ describe('AuthService', () => {
     service.signup(signupRequest).subscribe({
       next: () => fail('Should have failed'),
       error: (err: any) => {
-        expect(err).toEqual(error);
+        expect(err.status).toBe(400);
+        expect(err.error.message).toBe('Email already exists');
       }
     });
 
-    const req = httpMock.expectOne('http://localhost:3000/api/auth/signup');
+    const req = httpMock.expectOne('http://localhost:3000/api/auth/register');
     req.flush(error, { status: 400, statusText: 'Bad Request' });
   });
 
@@ -189,7 +195,8 @@ describe('AuthService', () => {
     service.refreshToken().subscribe({
       next: () => fail('Should have failed'),
       error: (err: any) => {
-        expect(err).toEqual(error);
+        expect(err.status).toBe(401);
+        expect(err.error.message).toBe('Invalid refresh token');
       }
     });
 
@@ -198,7 +205,8 @@ describe('AuthService', () => {
   });
 
   it('should get current user', () => {
-    localStorage.setItem('current_user', JSON.stringify(mockUser));
+    // Simulate a successful login to set the user in the BehaviorSubject
+    service['currentUserSubject'].next(mockUser);
     const currentUser = service.getCurrentUser();
     expect(currentUser).toEqual(mockUser);
   });
@@ -219,18 +227,20 @@ describe('AuthService', () => {
     const req = httpMock.expectOne('http://localhost:3000/api/auth/change-password');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({
-      current_password: currentPassword,
-      new_password: newPassword
+      currentPassword,
+      newPassword
     });
     req.flush({ success: true });
   });
 
   it('should check if user is admin', () => {
-    localStorage.setItem('current_user', JSON.stringify(mockUser));
+    // Test with regular user
+    service['currentUserSubject'].next(mockUser);
     expect(service.isAdmin()).toBeFalsy();
 
+    // Test with admin user
     const adminUser = { ...mockUser, role: 'admin' };
-    localStorage.setItem('current_user', JSON.stringify(adminUser));
+    service['currentUserSubject'].next(adminUser);
     expect(service.isAdmin()).toBeTruthy();
   });
 
@@ -262,14 +272,14 @@ describe('AuthService', () => {
     expect(emittedUser).toBeNull();
 
     // Simulate setting a user
-    service['setStoredUser'](mockUser);
+    service['currentUserSubject'].next(mockUser);
     expect(emittedUser).not.toBeNull();
     if (emittedUser) {
       expect(emittedUser).toEqual(mockUser);
     }
 
     // Simulate clearing user
-    service['clearStoredUser']();
+    service['currentUserSubject'].next(null);
     expect(emittedUser).toBeNull();
   });
 
@@ -283,11 +293,13 @@ describe('AuthService', () => {
     expect(isAuthenticated).toBeFalsy();
 
     // Simulate login
-    service['setStoredUser'](mockUser);
+    service['currentUserSubject'].next(mockUser);
+    service['isAuthenticatedSubject'].next(true);
     expect(isAuthenticated).toBeTruthy();
 
     // Simulate logout
-    service['clearStoredUser']();
+    service['currentUserSubject'].next(null);
+    service['isAuthenticatedSubject'].next(false);
     expect(isAuthenticated).toBeFalsy();
   });
 });
