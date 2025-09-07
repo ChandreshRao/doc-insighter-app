@@ -49,7 +49,7 @@ export class LoginComponent implements OnInit {
             horizontalPosition: 'center',
             verticalPosition: 'top'
           });
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/dashboard/overview']);
         },
         error: (error) => {
           this.isLoading = false;

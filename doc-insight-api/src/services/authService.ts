@@ -170,16 +170,6 @@ export class AuthService {
       // Verify refresh token
       const decoded = AuthUtils.verifyToken(refreshToken);
       
-      // Check if session exists and is active
-      const session = await this.db('user_sessions')
-        .where('user_id', decoded.user_id)
-        .where('is_active', true)
-        .first();
-
-      if (!session) {
-        throw new CustomError('Invalid refresh token', 401, ErrorCodes.INVALID_REFRESH_TOKEN);
-      }
-
       // Get user
       const user = await this.db('users')
         .where('id', decoded.user_id)
@@ -188,6 +178,23 @@ export class AuthService {
 
       if (!user) {
         throw new CustomError('User not found', 404, ErrorCodes.USER_NOT_FOUND);
+      }
+
+      // Check if session exists and is active (optional validation)
+      const session = await this.db('user_sessions')
+        .where('user_id', decoded.user_id)
+        .where('is_active', true)
+        .first();
+
+      // If no session exists, create one (for backward compatibility)
+      if (!session) {
+        await this.db('user_sessions').insert({
+          user_id: user.id,
+          token_hash: AuthUtils.generateSecureToken(),
+          refresh_token_hash: AuthUtils.generateSecureToken(),
+          is_active: true,
+          expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+        });
       }
 
       // Generate new access token

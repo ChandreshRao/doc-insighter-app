@@ -8,6 +8,7 @@ import { AdminGuard } from './guards/admin.guard';
 // Components
 import { LoginComponent } from './components/auth/login/login.component';
 import { SignupComponent } from './components/auth/signup/signup.component';
+import { DashboardLayoutComponent } from './components/dashboard-layout/dashboard-layout.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { DocumentManagementComponent } from './components/document-management/document-management.component';
 import { IngestionPanelComponent } from './components/ingestion-panel/ingestion-panel.component';
@@ -23,7 +24,7 @@ const routes: Routes = [
   // Protected routes
   {
     path: 'dashboard',
-    component: DashboardComponent,
+    component: DashboardLayoutComponent,
     canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'overview', pathMatch: 'full' },

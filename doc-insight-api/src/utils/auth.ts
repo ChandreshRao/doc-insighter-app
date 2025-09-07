@@ -49,8 +49,8 @@ export class AuthUtils {
       };
 
       return jwt.sign(payload, JWT_SECRET, {
-        issuer: 'rag-backend-service',
-        audience: 'rag-frontend',
+        issuer: 'doc-insight-api',
+        audience: 'doc-insight-portal',
       });
     } catch (error) {
       logger.error('Error generating access token:', error);

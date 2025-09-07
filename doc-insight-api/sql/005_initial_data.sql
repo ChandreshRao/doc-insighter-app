@@ -4,7 +4,7 @@ INSERT INTO users (email, username, password_hash, first_name, last_name, role, 
 VALUES (
     'admin@docinsight.com',
     'admin',
-    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8KzK4aG', -- Admin123!
+    '$2a$12$lZuCDCHMmgZLDie7fLI3h..mFddwNRx8A8FJn1mMgwXkdIXn39i4u', -- Admin123!
     'Admin',
     'User',
     'admin',
@@ -18,7 +18,7 @@ INSERT INTO users (email, username, password_hash, first_name, last_name, role, 
 VALUES (
     'editor@docinsight.com',
     'editor',
-    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8KzK4aG', -- Editor123!
+    '$2a$12$3PXrjWFz7iKN8orJxMpUAOUwcRZmWwGjoWVOtAxFHphGMwxHm607e', -- Editor123!
     'Editor',
     'User',
     'editor',
@@ -32,7 +32,7 @@ INSERT INTO users (email, username, password_hash, first_name, last_name, role, 
 VALUES (
     'viewer@docinsight.com',
     'viewer',
-    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/8KzK4aG', -- Viewer123!
+    '$2a$12$j4ZsW7RWKIRpIcJm0eIIz.TctmP1P3Y.MBa272YbFl2ac7QVvAb1W', -- Viewer123!
     'Viewer',
     'User',
     'viewer',

@@ -1,7 +1,7 @@
 <mat-toolbar color="primary" class="header-toolbar">
   <div class="header-content">
     <!-- Logo and Title -->
-    <div class="header-left">
+    <div class="header-left" (click)="goToHome()" style="cursor: pointer;">
       <mat-icon class="header-icon">description</mat-icon>
       <span class="header-title">{{ title }}</span>
     </div>

@@ -33,7 +33,7 @@ print_error() {
 wait_for_database() {
     print_info "Waiting for database to be ready..."
     
-    local max_attempts=30
+    local max_attempts=10
     local attempt=1
     
     while [ $attempt -le $max_attempts ]; do
@@ -50,7 +50,8 @@ wait_for_database() {
             pool.query('SELECT 1').then(() => {
                 console.log('Database is ready');
                 process.exit(0);
-            }).catch(() => {
+            }).catch((err) => {
+                console.error('Database connection failed:', err.message);
                 process.exit(1);
             });
         " 2>/dev/null; then
@@ -71,19 +72,35 @@ wait_for_database() {
 run_migrations() {
     print_info "Running database migrations..."
     
-    # Copy database files to dist if they don't exist
-    if [ ! -d "./dist/postgres-init" ]; then
-        print_info "Copying database files to dist..."
-        ./bin/copy-db-files.sh
-    fi
+    # Run migrations directly using psql
+    local sql_dir="/app/sql"
     
-    # Run migrations
-    if [ -f "./bin/migrate.sh" ]; then
-        print_info "Executing migration script..."
-        ./bin/migrate.sh
-        print_success "Migrations completed successfully"
+    if [ -d "$sql_dir" ]; then
+        print_info "Found SQL migration directory: $sql_dir"
+        
+        # Change to SQL directory and run the master migration script
+        cd "$sql_dir"
+        
+        print_info "Executing master migration script..."
+        PGPASSWORD="${DB_PASSWORD:-password_1234}" psql \
+            -h "${DB_HOST:-postgres}" \
+            -p "${DB_PORT:-5432}" \
+            -U "${DB_USER:-postgres}" \
+            -d "${DB_NAME:-doc_insight}" \
+            -f "00_migrate_all.sql" \
+            -v ON_ERROR_STOP=1
+        
+        if [ $? -eq 0 ]; then
+            print_success "All migrations completed successfully"
+        else
+            print_error "Migration failed"
+            return 1
+        fi
+        
+        # Change back to app directory
+        cd /app
     else
-        print_warning "Migration script not found, skipping migrations"
+        print_warning "SQL migration directory not found: $sql_dir"
     fi
 }
 
@@ -106,7 +123,7 @@ main() {
     print_info "Environment: ${NODE_ENV:-development}"
     print_info "Database: ${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-doc_insight}"
     
-    # Wait for database to be ready
+    # Wait for database to be ready (with shorter timeout since Docker handles dependency)
     wait_for_database
     
     # Run migrations

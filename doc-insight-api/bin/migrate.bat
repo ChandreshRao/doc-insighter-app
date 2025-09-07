@@ -6,7 +6,7 @@ setlocal enabledelayedexpansion
 
 REM Default values
 if not defined DB_HOST set DB_HOST=localhost
-if not defined DB_PORT set DB_PORT=5432
+if not defined DB_PORT set DB_PORT=5435
 if not defined DB_NAME set DB_NAME=doc_insight
 if not defined DB_USER set DB_USER=postgres
 if not defined DB_PASSWORD set DB_PASSWORD=password

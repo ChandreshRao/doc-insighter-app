@@ -58,8 +58,8 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-development}
       - PORT=${API_PORT:-3000}
-      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-your-refresh-secret-key-change-in-production}
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production-make-it-long-and-random
+      - JWT_REFRESH_SECRET=your-refresh-secret-key-change-in-production
       - DB_HOST=${DB_HOST:-postgres}
       - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-doc_insight}
@@ -70,7 +70,8 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:4200}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - /app/node_modules
       - /app/dist
@@ -100,7 +101,8 @@ services:
       - LOG_LEVEL=${LOG_LEVEL:-warn}
       - CORS_ORIGINS=${CORS_ORIGINS:-https://doc-insight.com}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - doc-insight-network
     restart: unless-stopped
@@ -119,14 +121,19 @@ services:
     ports:
       - "5435:5432"
     environment:
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password_1234}
-      - POSTGRES_DB=${POSTGRES_DB:-doc_insight}
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password_1234}
+      - POSTGRES_DB=${DB_NAME:-doc_insight}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - doc-insight-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-doc_insight}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # Test PostgreSQL
   test-postgres:

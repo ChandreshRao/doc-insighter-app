@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 
 # Default values
 DB_HOST=${DB_HOST:-"localhost"}
-DB_PORT=${DB_PORT:-"5432"}
+DB_PORT=${DB_PORT:-"5435"}
 DB_NAME=${DB_NAME:-"doc_insight"}
 DB_USER=${DB_USER:-"postgres"}
 DB_PASSWORD=${DB_PASSWORD:-"password"}
@@ -104,7 +104,7 @@ show_help() {
     echo ""
     echo "Options:"
     echo "  -h, --host HOST        Database host (default: localhost)"
-    echo "  -p, --port PORT        Database port (default: 5432)"
+    echo "  -p, --port PORT        Database port (default: 5435)"
     echo "  -d, --database NAME    Database name (default: doc_insight)"
     echo "  -u, --user USER        Database user (default: postgres)"
     echo "  -w, --password PASS    Database password (default: password)"
@@ -115,7 +115,7 @@ show_help() {
     echo ""
     echo "Examples:"
     echo "  $0                                    # Use default settings"
-    echo "  $0 -h localhost -p 5432 -d mydb      # Custom database settings"
+    echo "  $0 -h localhost -p 5435 -d mydb      # Custom database settings"
     echo "  DB_PASSWORD=mypass $0                 # Use environment variable"
 }
 

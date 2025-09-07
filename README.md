@@ -14,7 +14,7 @@ A comprehensive document management application with Angular frontend and Node.j
                               ▼
                        ┌──────────────────┐
                        │   PostgreSQL     │
-                       │   Port: 5432     │
+                       │   Port: 5435     │
                        └──────────────────┘
 ```
 

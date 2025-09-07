@@ -29,7 +29,7 @@ echo.
 echo Core services started successfully!
 echo Frontend: http://localhost:4200
 echo API: http://localhost:3000
-echo Database: localhost:5432
+echo Database: localhost:5435
 echo Redis: localhost:6379
 goto end
 

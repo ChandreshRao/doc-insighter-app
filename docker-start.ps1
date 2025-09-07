@@ -76,7 +76,7 @@ function Start-CoreServices {
     Write-Status "Core services started successfully!"
     Write-Status "Frontend: http://localhost:4200"
     Write-Status "API: http://localhost:3000"
-    Write-Status "Database: localhost:5432"
+    Write-Status "Database: localhost:5435"
     Write-Status "Redis: localhost:6379"
 }
 

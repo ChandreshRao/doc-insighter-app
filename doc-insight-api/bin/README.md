@@ -19,7 +19,7 @@ npm run db:migrate
 ./bin/migrate.sh
 
 # With custom database settings
-./bin/migrate.sh -h localhost -p 5432 -d mydb -u postgres -w mypassword
+./bin/migrate.sh -h localhost -p 5435 -d mydb -u postgres -w mypassword
 ```
 
 ### Windows
@@ -32,7 +32,7 @@ bin\migrate.bat
 
 # With custom database settings (set environment variables)
 set DB_HOST=localhost
-set DB_PORT=5432
+set DB_PORT=5435
 set DB_NAME=mydb
 set DB_USER=postgres
 set DB_PASSWORD=mypassword
@@ -44,7 +44,7 @@ bin\migrate.bat
 You can set these environment variables instead of using command line arguments:
 
 - `DB_HOST` - Database host (default: localhost)
-- `DB_PORT` - Database port (default: 5432)
+- `DB_PORT` - Database port (default: 5435)
 - `DB_NAME` - Database name (default: doc_insight)
 - `DB_USER` - Database user (default: postgres)
 - `DB_PASSWORD` - Database password (default: password)

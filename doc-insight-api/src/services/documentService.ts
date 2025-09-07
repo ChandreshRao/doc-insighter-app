@@ -360,8 +360,9 @@ export class DocumentService {
         .groupBy('status');
 
       // Get total file size
-      const [{ totalSize }] = await baseQuery
+      const totalSizeResult = await baseQuery
         .sum('file_size as totalSize');
+      const totalSize = totalSizeResult[0]?.totalSize || 0;
 
       // Get file type distribution
       const fileTypeStats = await baseQuery
@@ -373,9 +374,10 @@ export class DocumentService {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       
-      const [{ recentCount }] = await baseQuery
+      const recentCountResult = await baseQuery
         .where('created_at', '>=', sevenDaysAgo)
         .count('* as recentCount');
+      const recentCount = recentCountResult[0]?.recentCount || 0;
 
       const stats = {
         byStatus: statusStats.reduce((acc: any, stat: any) => {

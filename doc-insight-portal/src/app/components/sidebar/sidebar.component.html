@@ -26,7 +26,7 @@
            *ngFor="let item of getFilteredMenuItems()"
            [routerLink]="item.route"
            routerLinkActive="active"
-           (click)="navigateTo(item.route)"
+           (click)="onNavigationClick()"
            class="nav-item">
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
           <span matListItemTitle>{{ item.label }}</span>

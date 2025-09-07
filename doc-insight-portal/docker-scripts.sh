@@ -59,7 +59,7 @@ start_dev() {
     print_success "Development environment started!"
     print_status "Frontend: http://localhost:4200"
     print_status "Backend: http://localhost:3000"
-    print_status "PostgreSQL: localhost:5432"
+    print_status "PostgreSQL: localhost:5435"
 }
 
 # Function to start production environment
@@ -69,7 +69,7 @@ start_prod() {
     print_success "Production environment started!"
     print_status "Frontend: http://localhost:80"
     print_status "Backend: http://localhost:3000"
-    print_status "PostgreSQL: localhost:5432"
+    print_status "PostgreSQL: localhost:5435"
 }
 
 # Function to start test environment

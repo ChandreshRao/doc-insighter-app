@@ -41,6 +41,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { LoginComponent } from './components/auth/login/login.component';
 import { SignupComponent } from './components/auth/signup/signup.component';
+import { DashboardLayoutComponent } from './components/dashboard-layout/dashboard-layout.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { DocumentManagementComponent } from './components/document-management/document-management.component';
 import { IngestionPanelComponent } from './components/ingestion-panel/ingestion-panel.component';
@@ -57,6 +58,7 @@ import { ErrorMessageComponent } from './components/shared/error-message/error-m
 import { AuthService } from './services/auth.service';
 import { DocumentService } from './services/document.service';
 import { IngestionService } from './services/ingestion.service';
+import { DashboardService } from './services/dashboard.service';
 import { QaService } from './services/qa.service';
 import { UserService } from './services/user.service';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
@@ -75,6 +77,7 @@ import { AppRoutingModule } from './app-routing.module';
     SidebarComponent,
     LoginComponent,
     SignupComponent,
+    DashboardLayoutComponent,
     DashboardComponent,
     DocumentManagementComponent,
     IngestionPanelComponent,
@@ -130,6 +133,7 @@ import { AppRoutingModule } from './app-routing.module';
     AuthService,
     DocumentService,
     IngestionService,
+    DashboardService,
     QaService,
     UserService,
     AuthGuard,

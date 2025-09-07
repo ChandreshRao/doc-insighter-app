@@ -126,11 +126,15 @@ export class AuthService {
       .pipe(
         tap(response => {
           this.setToken(response.data.access_token);
-          this.setRefreshToken(response.data.refresh_token);
+          // Note: Backend doesn't return a new refresh token, so we keep the existing one
           this.setStoredUser(response.data.user);
           this.currentUserSubject.next(response.data.user);
         }),
-        catchError(this.handleError)
+        catchError(error => {
+          // If refresh fails, clear all auth data and redirect to login
+          this.logout();
+          return throwError(() => error);
+        })
       );
   }
 

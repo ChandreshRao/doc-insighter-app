@@ -4,8 +4,9 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Install nodemon globally for development
-RUN npm install -g nodemon
+# Install nodemon globally for development and postgresql client
+RUN npm install -g nodemon && \
+    apk add --no-cache postgresql-client
 
 # Copy package files
 COPY package*.json ./
@@ -19,11 +20,11 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p logs uploads
 
-# Make startup script executable
-RUN chmod +x ./scripts/startup.sh
+# Make scripts executable
+RUN chmod +x ./scripts/startup.sh ./bin/migrate.sh ./bin/setup-env.sh ./bin/copy-db-files.sh
 
 # Expose port
 EXPOSE 3000
 
 # Start with migrations and nodemon for development
-CMD ["./scripts/startup.sh"]
+CMD ["sh", "-c", "ls -la && ls -la scripts/ && ls -la bin/ && sh scripts/startup.sh"]

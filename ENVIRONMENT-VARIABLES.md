@@ -29,7 +29,7 @@ This document describes all environment variables used in the Doc Insight API ap
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `DB_HOST` | `postgres` | Database host address |
-| `DB_PORT` | `5432` | Database port number |
+| `DB_PORT` | `5435` | Database port number |
 | `DB_NAME` | `doc_insight` | Database name |
 | `DB_USER` | `postgres` | Database username |
 | `DB_PASSWORD` | `password` | Database password |
@@ -124,7 +124,7 @@ MOCK_INGESTION_AUTO_CLEANUP=true
 
 # Local database
 DB_HOST=localhost
-DB_PORT=5432
+DB_PORT=5435
 DB_NAME=doc_insight_dev
 DB_USER=postgres
 DB_PASSWORD=dev_password
@@ -146,7 +146,7 @@ PYTHON_SERVICE_URL=https://your-python-service.com
 PYTHON_SERVICE_API_KEY=your_production_api_key
 
 # Production database
-DATABASE_URL=postgresql://user:password@db-host:5432/doc_insight_prod
+DATABASE_URL=postgresql://user:password@db-host:5435/doc_insight_prod
 
 # Production logging
 LOG_LEVEL=info
@@ -172,7 +172,7 @@ MOCK_INGESTION_AUTO_CLEANUP=true
 MOCK_INGESTION_CLEANUP_INTERVAL=10000
 
 # Test database
-DATABASE_URL_TEST=postgresql://user:password@localhost:5432/doc_insight_test
+DATABASE_URL_TEST=postgresql://user:password@localhost:5435/doc_insight_test
 
 # Test logging
 LOG_LEVEL=error
@@ -220,7 +220,7 @@ When using Docker, you can pass environment variables through:
    ```yaml
    environment:
      - NODE_ENV=production
-     - DATABASE_URL=postgresql://user:pass@db:5432/doc_insight
+     - DATABASE_URL=postgresql://user:pass@db:5435/doc_insight
    ```
 
 2. **Docker Run**:

@@ -13,7 +13,15 @@
 
   <!-- Statistics Cards -->
   <div class="stats-section">
-    <h2 class="section-title">Overview</h2>
+    <div class="section-header">
+      <h2 class="section-title">Overview</h2>
+      <button mat-icon-button 
+              (click)="refreshStats()" 
+              [disabled]="isLoading"
+              matTooltip="Refresh statistics">
+        <mat-icon [class.spinning]="isLoading">refresh</mat-icon>
+      </button>
+    </div>
     <div class="stats-grid">
       <mat-card 
         *ngFor="let card of statCards" 

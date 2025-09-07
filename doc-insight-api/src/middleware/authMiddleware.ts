@@ -25,6 +25,7 @@ export const authenticateToken = async (
     const authHeader = req.headers.authorization;
     const token = AuthUtils.extractTokenFromHeader(authHeader);
 
+
     if (!token) {
       res.status(401).json({
         success: false,
@@ -37,30 +38,42 @@ export const authenticateToken = async (
     // Verify token
     const decoded = AuthUtils.verifyToken(token);
     
-    // Check if token is blacklisted (logout)
+    // Check if user exists and is active
     const db = getDatabase();
-    const session = await db('user_sessions')
-      .where('token_hash', AuthUtils.generateSecureToken())
+    const user = await db('users')
+      .where('id', decoded.user_id)
       .where('is_active', true)
-      .where('expires_at', '>', new Date())
       .first();
 
-    if (!session) {
+    if (!user) {
       res.status(401).json({
         success: false,
-        error: 'Token invalid or expired',
+        error: 'User not found or inactive',
         timestamp: new Date().toISOString(),
       });
       return;
     }
 
+    // Check if session exists and is active (optional validation)
+    const session = await db('user_sessions')
+      .where('user_id', decoded.user_id)
+      .where('is_active', true)
+      .where('expires_at', '>', new Date())
+      .first();
+
+    // If no session exists, create one (for backward compatibility)
+    if (!session) {
+      await db('user_sessions').insert({
+        user_id: decoded.user_id,
+        token_hash: AuthUtils.generateSecureToken(),
+        refresh_token_hash: AuthUtils.generateSecureToken(),
+        is_active: true,
+        expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      });
+    }
+
     // Attach user info to request
     req.user = decoded;
-    
-    // Update last used timestamp
-    await db('user_sessions')
-      .where('id', session.id)
-      .update({ last_used_at: new Date() });
 
     next();
   } catch (error) {

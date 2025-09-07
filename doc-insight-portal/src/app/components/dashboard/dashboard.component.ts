@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
+import { DashboardService, DashboardStats } from '../../services/dashboard.service';
+import { Subject, takeUntil } from 'rxjs';
 
 interface StatCard {
   title: string;
@@ -15,9 +17,11 @@ interface StatCard {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   isLoading = false;
+  private destroy$ = new Subject<void>();
+  dashboardStats: DashboardStats | null = null;
 
   statCards: StatCard[] = [
     {
@@ -76,19 +80,30 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private dashboardService: DashboardService
   ) {}
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(user => {
       this.currentUser = user;
     });
+
+    // Load dashboard statistics
+    this.loadDashboardStats();
 
     // Filter admin-only items
     if (!this.authService.isAdmin()) {
       this.statCards = this.statCards.filter(card => card.title !== 'Active Users');
       this.quickActions = this.quickActions.filter(action => action.title !== 'Start Ingestion');
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   navigateTo(route: string): void {
@@ -100,5 +115,45 @@ export class DashboardComponent implements OnInit {
     if (hour < 12) return 'Good morning';
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
+  }
+
+  private loadDashboardStats(): void {
+    this.isLoading = true;
+    
+    this.dashboardService.getDashboardStats()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (stats) => {
+          this.dashboardStats = stats;
+          this.updateStatCards(stats);
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading dashboard stats:', error);
+          this.isLoading = false;
+          // Keep default values on error
+        }
+      });
+  }
+
+  private updateStatCards(stats: DashboardStats): void {
+    this.statCards = this.statCards.map(card => {
+      switch (card.title) {
+        case 'Total Documents':
+          return { ...card, value: stats.totalDocuments };
+        case 'Processing Status':
+          return { ...card, value: stats.processingStatus };
+        case 'Questions Asked':
+          return { ...card, value: stats.questionsAsked };
+        case 'Active Users':
+          return { ...card, value: stats.activeUsers };
+        default:
+          return card;
+      }
+    });
+  }
+
+  refreshStats(): void {
+    this.loadDashboardStats();
   }
 }

@@ -1,25 +1,6 @@
 <div class="app-container">
-  <!-- Header -->
-  <app-header 
-    *ngIf="isAuthenticated"
-    [title]="title"
-    [currentUser]="currentUser"
-    (logout)="logout()">
-  </app-header>
-
-  <!-- Main Content -->
-  <div class="main-content" [class.with-header]="isAuthenticated">
-    <!-- Sidebar for authenticated users -->
-    <app-sidebar 
-      *ngIf="isAuthenticated"
-      class="sidebar">
-    </app-sidebar>
-
-    <!-- Router outlet for main content -->
-    <div class="content-area" [class.with-sidebar]="isAuthenticated">
-      <router-outlet></router-outlet>
-    </div>
-  </div>
+  <!-- Router outlet for main content -->
+  <router-outlet></router-outlet>
 
   <!-- Loading overlay -->
   <div class="loading-overlay" *ngIf="false">

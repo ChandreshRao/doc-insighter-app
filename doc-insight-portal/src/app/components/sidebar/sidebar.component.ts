@@ -78,9 +78,7 @@ export class SidebarComponent implements OnInit {
     );
   }
 
-  navigateTo(route: string): void {
-    this.router.navigate([route]);
-    
+  onNavigationClick(): void {
     if (this.isMobile) {
       this.isOpen = false;
     }
